@@ -1,17 +1,26 @@
+FROM node:20 AS builder
+
+WORKDIR /clean-arch
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npx prisma generate   
+RUN npm run build
+
+# =========================
+
 FROM node:20
 
 WORKDIR /clean-arch
 
-# 1. Copiar dependencias
 COPY package*.json ./
+RUN npm install --omit=dev
 
-# 2. Instalar dependencias
-RUN npm install
+COPY --from=builder /clean-arch/dist ./dist
+COPY --from=builder /clean-arch/prisma ./prisma
 
-# 3. Copiar código
-COPY . .
-
-# 4. Compilar
-RUN npm run build
+RUN npx prisma generate   
 
 CMD ["npm", "start"]

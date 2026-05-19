@@ -144,7 +144,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Ariza\\Downloads\\clean-arch\\clean-arch\\prisma\\generated\\client",
+      "value": "C:\\Users\\Ariza\\OneDrive\\Documents\\GitHub\\techassessment_name\\clean-arch\\prisma\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -158,7 +158,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Ariza\\Downloads\\clean-arch\\clean-arch\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Ariza\\OneDrive\\Documents\\GitHub\\techassessment_name\\clean-arch\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -172,6 +172,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
