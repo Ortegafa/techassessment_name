@@ -5,25 +5,30 @@ services:
     image: postgres:13
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: "12345"
       POSTGRES_DB: users_db
     ports:
       - "5435:5432"
-      
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build: .
     ports:
       - "3000:3000"
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_NAME: users_db
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:12345@db:5432/users_db
+      JWT_SECRET: "your_jwt_secret_key"
     depends_on:
-      - db    
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:

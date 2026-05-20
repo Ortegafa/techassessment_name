@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '../../application/dto/createUser.dto';
 import { GetUserDto } from 'src/application/dto/getUser.dto';
 import { UpdateUserDto } from '../../application/dto/updateUser.dto';
@@ -7,14 +7,18 @@ import { GetUserUseCase } from '../../application/use-cases/get-user.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/updateUser.use-case';
 import { BlockUserUseCase } from 'src/application/use-cases/blockUser.user-case';
 import { InactivateUserUseCase } from 'src/application/use-cases/inactivateUser.use-case';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ActivateUserUseCase } from '../../application/use-cases/activateUser.user-case';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 import { LoginDto } from '../../application/dto/login.dto';
 import { DeleteUserUseCase } from 'src/application/use-cases/deleteUser-use-case';
 import { User } from '../../domain/entities/user.entity';
+import { JwtAuthGuard } from '../shared/guards/jwt-auth.guard';
+import { RolesGuard } from '../shared/guards/roles.guard';
+import { Roles } from '../shared/decorators/roles.decorator';
+import { RoleName } from 'src/application/dto/createRole.dto';
 
-@ApiTags("Users")
+@ApiBearerAuth("bearer")
 @Controller('users')
 export class UsersController{
   constructor(
@@ -111,7 +115,9 @@ export class UsersController{
     })
     return user
   }
-
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles(RoleName.Doctor)
+  @ApiBearerAuth()
   @Post('/delete/:id')
   @ApiOperation({summary:"Delete User"})
   @ApiOkResponse({description:"User Deleted Correctly"})

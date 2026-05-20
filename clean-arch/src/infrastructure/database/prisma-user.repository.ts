@@ -9,7 +9,7 @@ export class PrismaUserRepository implements UserRepository{
         private readonly prisma:PrismaService
     ){}
 
-    async save(user:User): Promise<User>{
+    async save(user:User): Promise<User> {
         const saved = await this.prisma.user.create({
             data:{
                 username: user.username,

@@ -1,7 +1,17 @@
-import {CanActivate,ExecutionContext,ForbiddenException,Injectable,Inject,} from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
+
 import { Reflector } from '@nestjs/core';
+
 import { ROLES_KEY } from '../decorators/roles.decorator';
+
 import { ROLE_REPOSITORY } from 'src/application/tokens';
+
 import type { RoleRepository } from 'src/domain/repositories/role.repository.port';
 
 @Injectable()
@@ -10,7 +20,7 @@ export class RolesGuard implements CanActivate {
     private readonly reflector: Reflector,
 
     @Inject(ROLE_REPOSITORY)
-    private readonly roleRepo: RoleRepository, // <-- CONSULTA LA BASE DE DATOS
+    private readonly roleRepo: RoleRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -19,36 +29,38 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    // Si el endpoint no requiere roles
-    if (!requiredRoles || requiredRoles.length === 0) return true;
+    // Si la ruta no requiere roles
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
 
     const request = context.switchToHttp().getRequest();
+
     const user = request.user;
 
-    if (!user) throw new ForbiddenException('User not authenticated');
-
-    const userRoleId = user.roleId;
-
-    if (!userRoleId) {
-      throw new ForbiddenException('User token does not contain roleId');
+    if (!user) {
+      throw new ForbiddenException('User not authenticated');
     }
 
-    // 🔥 CONSULTAR EL ROL EN LA BD
-    const role = await this.roleRepo.findRoleById(userRoleId);
+    if (!user.roleId) {
+      throw new ForbiddenException(
+        'User token does not contain roleId',
+      );
+    }
+
+    // Buscar el rol asociado al roleId
+    const role = await this.roleRepo.findRoleById(user.roleId);
 
     if (!role) {
-      throw new ForbiddenException('Role not found in database');
+      throw new ForbiddenException('Role not found');
     }
 
-    // role.name es tu enum ('Admin' | 'Doctor' | 'Nurse' | 'Patient')
-    const userRoleName = role.name;
+    // Validar usando el nombre del rol
+    const hasPermission = requiredRoles.includes(role.name);
 
-    // Comparar por nombres de rol
-    const hasRole = requiredRoles.includes(userRoleName);
-
-    if (!hasRole) {
+    if (!hasPermission) {
       throw new ForbiddenException(
-        `Access denied. Required roles: ${requiredRoles.join(', ')}`,
+        `Access denied for role: ${role.name}`,
       );
     }
 

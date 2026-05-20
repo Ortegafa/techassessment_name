@@ -14,13 +14,13 @@ export class PrismaRoleRepository implements RoleRepository {
                 name: role.name,
             },
         });
-        return new Role(saved.id, 
+        return new Role(saved.roleId, 
             saved.name);
     }
 
     async findRoleById(roleId: number): Promise<Role | null> {
         const role = await this.prisma.role.findUnique({
-            where: { roleId },
+            where: { roleId: Number(roleId) },
         });
         return role
     }

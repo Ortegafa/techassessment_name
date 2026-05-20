@@ -3,7 +3,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { UsersController } from "../controllers/users.controller";
-import { TOKEN_SERVICE, USER_REPOSITORY } from "../../application/tokens";
+import { ROLE_REPOSITORY, TOKEN_SERVICE, USER_REPOSITORY } from "../../application/tokens";
 import { UserRepository } from "../../domain/repositories/user.repository.port";
 import { TokenServicePort } from "../../domain/repositories/token.repository.port";
 
@@ -19,10 +19,13 @@ import { InactivateUserUseCase } from "src/application/use-cases/inactivateUser.
 import { ActivateUserUseCase } from "../../application/use-cases/activateUser.user-case";
 import { LoginUseCase } from "../../application/use-cases/login.use-case";
 import { DeleteUserUseCase } from "src/application/use-cases/deleteUser-use-case";
+import { PrismaRoleRepository } from "src/infrastructure/database/prisma-role.repository";
+import { JwtStrategy } from "../shared/strategies/jwt.strategy";
+import { PassportModule } from "@nestjs/passport";
 
 @Module({
   imports: [
-
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     // 👇 Usa ConfigService para leer el secret después de cargar el .env
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -36,11 +39,16 @@ import { DeleteUserUseCase } from "src/application/use-cases/deleteUser-use-case
   controllers: [UsersController],
   providers: [
     PrismaService,
+    JwtStrategy,
 
     {
       provide: USER_REPOSITORY,
       useFactory: (prisma: PrismaService) => new PrismaUserRepository(prisma),
       inject: [PrismaService],
+    },
+    {
+      provide: ROLE_REPOSITORY,
+      useClass: PrismaRoleRepository
     },
     {
       provide: TOKEN_SERVICE,

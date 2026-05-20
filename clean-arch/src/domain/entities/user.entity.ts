@@ -7,5 +7,6 @@ export class User {
     public readonly email: string,
     public readonly status: 'active' | 'inactive' | 'blocked',
     public readonly createdAt: Date,
+    
   ) {}
 }
